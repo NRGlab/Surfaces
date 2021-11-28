@@ -241,6 +241,8 @@ def main():
     for residue in res1:
         list_interact = list_interactions(residue, matrix, res2)
         surface_list.append(list_interact[:-2])
+        if list_interact != '':
+            print (residue + ': ' + list_interact[:-2])
     
     matrix['Interactions'] = surface_list
     
