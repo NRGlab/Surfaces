@@ -1,6 +1,6 @@
 # surfaces
 
-clang Vcontacts-v1-2.c -o vcon
+clang Vcontacts.c -o vcon
 
 For numeric interface interactions between chain A and B of pdb file
 
