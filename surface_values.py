@@ -93,11 +93,9 @@ def fix_chain(file, chain1, chain2, inits, ends):
     Lines1 = f.readlines()
     Lines2 = []
     for line in Lines1:
-        if line[:1] != '#' and line[6:7] == '|':
-            chain = test_chain(int(line[:6]), chain1, chain2, inits, ends)
-            #print (chain)
-            line = line[:31] + chain + line[32:]
-            #print (line)
+        if line[:1] != '#' and line[31:34] != 'Sol' and line != '\n':
+            chain = test_chain(int(line[20:30]), chain1, chain2, inits, ends)
+            line = line[:45] + chain + line[46:]
             Lines2.append(line)
         else:
             Lines2.append(line)
@@ -113,28 +111,35 @@ def fix_chain(file, chain1, chain2, inits, ends):
 
 def read_atom(line):
     atnum = int(line[:6])
-    attype = line[10:13]
-    resnum = int(line[15:20])
-    res = line[25:28]
-    chain = line[31:32]
+    attype = line[8:11]
+    resnum = int(line[12:17])
+    res = line[19:22]
+    chain = line[23:24]
+    #print (atnum)
+    #print (attype)
+    #print (resnum)
+    #print (res)
+    #print (chain)
     return (atnum,attype,resnum,res,chain)
 
 def read_surface(line):
-    ind = line[35:].index('|')
-    surf = (float(line[35:35+ind]))
+    surf = (float(line[-6:-1]))
+    #print (surf)
     return (surf)
 
 def read_interactions(file, matrix, chain1, chain2):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
-        if line[:1] != '#' and line[6:7] == '|':
-            if line[35:38] == 'Sol':
+        if line[:1] != '#' and line != '\n':
+            if line[31:34] == 'Sol':
+                #print (line)
                 main_line = line
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(main_line)
                 main_residue = main_res+str(main_resnum)+main_chain
             else:
-                atnum,attype,resnum,res,chain = read_atom(line)
+                #print (line[22:])
+                atnum,attype,resnum,res,chain = read_atom(line[22:])
                 other_residue = res+str(resnum)+chain
                 surf = read_surface(line)
                 if (chain in chain1 and main_chain in chain2) or (chain in chain2 and main_chain in chain1):
@@ -234,6 +239,7 @@ def main():
     clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
         
     vcon('clean.pdb')
+    #print (inits, ends)
     fix_chain('vcon_file.txt', args.chain1, args.chain2, inits, ends)
   
     matrix = [ [ 0 for i in range(len(res2)) ] for j in range(len(res1)) ]
