@@ -11,6 +11,7 @@ import time
 #Useful dicts
 aa = {'C':'CYS', 'D':'ASP', 'S':'SER', 'Q':'GLN', 'K':'LYS', 'I':'ILE', 'P':'PRO', 'T':'THR', 'F':'PHE', 'N':'ASN', 'G':'GLY', 'H':'HIS', 'L':'LEU', 'R':'ARG', 'W':'TRP', 'A':'ALA', 'V':'VAL', 'E':'GLU', 'Y':'TYR', 'M':'MET'}
 
+
 #Input of pdb file and the 2 chains between which we want to evaluate the interactions
 
 def read_residues(pdb_file, chain1, chain2):
@@ -20,33 +21,31 @@ def read_residues(pdb_file, chain1, chain2):
     Lines = f.readlines()
     for line in Lines:
         if line[:4] == 'ATOM':
-            if line[21] == chain1:
-                res_num = re.findall('\d',line[23:27])
+            if line[21] in chain1:
+                res_num = re.findall('\d',line[22:27])
                 res_num = int(''.join(res_num))
                 res_name = line[17:20]
-                string = res_name + str(res_num) + chain1
+                string = res_name + str(res_num) + line[21]
                 if string not in list_chain1:
                     list_chain1.append(string)
-            if line[21] == chain2:
-                res_num = re.findall('\d',line[23:27])
+            if line[21] in chain2:
+                res_num = re.findall('\d',line[22:27])
                 res_num = int(''.join(res_num))
                 res_name = line[17:20]
-                string = res_name + str(res_num) + chain2
+                string = res_name + str(res_num) + line[21]
                 if string not in list_chain2:
                     list_chain2.append(string)
-    atoms_chain1 = []
-    atoms_chain2 = []
+    chains = chain1 + chain2
+    atoms_init = [-1]*len(chains)
+    atoms_end = [-1]*len(chains)
     for line in Lines:
-        if line[:4] == 'ATOM':
-            if line[21] == chain1:
-                atoms_chain1.append(int(line[6:12]))
-            if line[21] == chain2:
-                atoms_chain2.append(int(line[6:12]))
-    init1 = atoms_chain1[0]
-    end1 = atoms_chain1[-1]
-    init2 = atoms_chain2[0]
-    end2 = atoms_chain2[-1]
-    return (list_chain1, init1, end1, list_chain2, init2, end2)
+        for i in range(len(chains)):
+            if line[:4] == 'ATOM' and line[21] == chains[i]:
+                if atoms_init[i] == -1:
+                    atoms_init[i] = (int(line[6:12]))
+                if int(line[6:12]) > atoms_end[i]:
+                    atoms_end[i] = (int(line[6:12]))
+    return (list_chain1, list_chain2, chains, atoms_init, atoms_end)
 
 def clean_pdb(pdb_file, chain1, chain2, new_file):
     f = open(pdb_file, 'r')
@@ -54,7 +53,7 @@ def clean_pdb(pdb_file, chain1, chain2, new_file):
     Lines2 = []
     for line in Lines1:
         if line[:4] == 'ATOM':
-            if line[21] == chain1 or line[21] == chain2:
+            if line[21] in chain1 or line[21] in chain2:
                 #print (line)
                 Lines2.append(line)
     f.close()
@@ -64,7 +63,9 @@ def clean_pdb(pdb_file, chain1, chain2, new_file):
     e.close()
     return
 
+
 #Function to generate the file with the output of perl code vcont.pl
+
 def vcont(pdb_name):
     string = "perl -w vcont.pl -f " + pdb_name + " > vcont_output.txt"
     #print (string)
@@ -76,27 +77,25 @@ def vcon(pdb_name):
     #print (string)
     os.system(string)
     #print ('vcon done')
-
-
+    
+    
 #Functions to fix the names of the chains
 
-def test_chain(atom, chain1, init1, end1, chain2, init2, end2):
-    if atom >=init1 and atom <=end1:
-        chain = chain1
-    if atom >=init2 and atom <=end2:
-        chain = chain2
+def test_chain(atom, chain1, chain2, inits, ends):
+    chains = chain1 + chain2
+    for i in range(len(chains)):
+        if atom >=inits[i] and atom <=ends[i]:
+            chain = chains[i]
     return (chain)
 
-def fix_chain(file, chain1, init1, end1, chain2, init2, end2):
+def fix_chain(file, chain1, chain2, inits, ends):
     f = open(file, 'r')
     Lines1 = f.readlines()
     Lines2 = []
     for line in Lines1:
-        if line[:1] != '#' and line[6:7] == '|':
-            chain = test_chain(int(line[:6]), chain1, init1, end1, chain2, init2, end2)
-            #print (chain)
-            line = line[:31] + chain + line[32:]
-            #print (line)
+        if line[:1] != '#' and line[31:34] != 'Sol' and line != '\n':
+            chain = test_chain(int(line[20:30]), chain1, chain2, inits, ends)
+            line = line[:45] + chain + line[46:]
             Lines2.append(line)
         else:
             Lines2.append(line)
@@ -112,39 +111,47 @@ def fix_chain(file, chain1, init1, end1, chain2, init2, end2):
 
 def read_atom(line):
     atnum = int(line[:6])
-    attype = line[10:13]
-    resnum = int(line[15:20])
-    res = line[25:28]
-    chain = line[31:32]
+    attype = line[8:11]
+    resnum = int(line[12:17])
+    res = line[19:22]
+    chain = line[23:24]
+    #print (atnum)
+    #print (attype)
+    #print (resnum)
+    #print (res)
+    #print (chain)
     return (atnum,attype,resnum,res,chain)
 
 def read_surface(line):
-    ind = line[35:].index('|')
-    surf = (float(line[35:35+ind]))
+    surf = (float(line[-6:-1]))
+    #print (surf)
     return (surf)
 
 def read_interactions(file, matrix, chain1, chain2):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
-        if line[:1] != '#' and line[6:7] == '|':
-            if line[35:38] == 'Sol':
+        if line[:1] != '#' and line != '\n':
+            if line[31:34] == 'Sol':
+                #print (line)
                 main_line = line
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(main_line)
                 main_residue = main_res+str(main_resnum)+main_chain
             else:
-                atnum,attype,resnum,res,chain = read_atom(line)
+                #print (line[22:])
+                atnum,attype,resnum,res,chain = read_atom(line[22:])
                 other_residue = res+str(resnum)+chain
                 surf = read_surface(line)
-                if chain != main_chain:
-                    if main_chain == chain2:
+                if (chain in chain1 and main_chain in chain2) or (chain in chain2 and main_chain in chain1):
+                    if main_chain in chain2:
                         #print (other_residue, main_residue)
                         matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res))/2
-                    if main_chain == chain1:
+                    if main_chain in chain1:
                         #print (main_residue, other_residue)
                         matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res))/2
   
     return(matrix)
+
 
 #get the atom type number from file AMINO.def
 def atomtype_num(file, res, attyp):
@@ -200,7 +207,7 @@ def create_unbound(pdb_file, chain, new_pdb_file):
     Lines = f.readlines()
     new_Lines = []
     for line in Lines:
-        if line[:4] == 'ATOM' and line[21] == chain:
+        if line[:4] == 'ATOM' and line[21] in chain:
                 new_Lines.append(line)
     f.close()
     e = open(new_pdb_file, 'w') 
@@ -225,7 +232,7 @@ def interactions_solvent(residues_list, file):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
-        if len(line) >=6 and line[35:38] == 'Sol':
+        if len(line) >=6 and line[31:34] == 'Sol':
             surface = read_solvent_surface(line)
             atnum,attype,resnum,res,chain = read_atom(line)
             residue = res+str(resnum)+chain
@@ -247,13 +254,13 @@ def main():
     parser.add_argument("-o","--output_name", action="store")
     args=parser.parse_args()
 
-    res1, init1, end1, res2, init2, end2 = read_residues(args.pdb_file, args.chain1, args.chain2)
+    res1, res2, chains, inits, ends = read_residues(args.pdb_file, args.chain1, args.chain2)
     clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
     
     #results for the specific mut
 
     vcon('clean.pdb')
-    fix_chain('vcon_file.txt', args.chain1, init1, end1, args.chain2, init2, end2)
+    fix_chain('vcon_file.txt', args.chain1, args.chain2, inits, ends)
   
     matrix = [ [ 0 for i in range(len(res2) + 2) ] for j in range(len(res1) + 2) ]
     matrix = pd.DataFrame(matrix)
@@ -264,6 +271,7 @@ def main():
     
     print (matrix)
     
+    
     #generating interactions of RBD with solvent and ACE2 with solvent for bound state
     
     boundRBD = interactions_solvent(res1, 'vcon_file.txt')
@@ -273,14 +281,14 @@ def main():
 
     create_unbound('clean.pdb', args.chain1,'unbound1.pdb')
     vcon('unbound1.pdb')
-    fix_chain('vcon_file.txt', args.chain1, init1, end1, args.chain2, init2, end2)
+    fix_chain('vcon_file.txt', args.chain1, args.chain2, inits, ends)
     unboundRBD = interactions_solvent(res1, 'vcon_file.txt')
     
     #generating interactions of ACE2 with solvent for unbound state - done only once, result now put as a row that will be added to every mutant
     
     create_unbound(args.pdb_file, args.chain2,'unbound2.pdb')
     vcon('unbound2.pdb')
-    fix_chain('vcon_file.txt', args.chain1, init1, end1, args.chain2, init2, end2)
+    fix_chain('vcon_file.txt', args.chain1, args.chain2, inits, ends)
     unboundACE2 = interactions_solvent(res2, 'vcon_file.txt')
     #print (unboundACE2)
     
@@ -294,7 +302,7 @@ def main():
     print (matrix)
     
     matrix.to_csv(args.output_name)
-    
+
     
     #TESTS
     
