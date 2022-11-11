@@ -13,3 +13,8 @@ python surface_list.py -f file.pdb -c1 ABC -c2 DE -o output.csv
 For list of interactions with partial CF values between chains ABC... and DE... of pdb file
 
 python surface_values.py -f file.pdb -c1 ABC -c2 DE -o output.csv
+
+
+For a visual output as a pymol session
+
+python image_surfaces.py -f pdb_file.pdb -c csv_file.csv -o pymol_session_output.pse
