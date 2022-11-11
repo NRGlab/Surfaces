@@ -50,12 +50,12 @@ def color_scale(values):
     Total_colors = []
     
     for i in range(5):
-        c = Color("red", saturation=1/(i+1))
+        c = Color("blue", saturation=1/(i+1))
         Total_colors.append(c.rgb)
     white = Color("white")
     Total_colors.append(white.rgb)
     for i in range(5):
-        c = Color("blue", saturation=1/(5-i))
+        c = Color("red", saturation=1/(5-i))
         Total_colors.append(c.rgb)
     print (Total_colors)
     
