@@ -19,7 +19,7 @@ python surface_values.py -f file.pdb -c1 ABC -c2 DE -o output.csv
 
 For numeric interface interactions between chain ABC... and DE... of pdb file
 
-python new_surface_cont.py -f file.pdb -c1 ABC -c2 DE -o output.csv
+python new_surface_cont.py -f file.pdb -c1 ABC -c2 DE -o output.csv -def atomtypes_definition.def -dat atomtypes_interactions.dat
 
 For a visual output as a pymol session
 
