@@ -158,11 +158,11 @@ def atomtype_num(def_file, res, attyp):
     Lines = f.readlines()
     for i in range(len(Lines)):
         if Lines[i][:3] == res:
-            print (Lines[i])
+            #print (Lines[i])
             ind = Lines[i].index(attyp+':')
-            print (Lines[i][ind:])
+            #print (Lines[i][ind:])
             ind_end = Lines[i][ind:].index(',')
-            print (Lines[i][ind+len(attyp)+1:ind+ind_end])
+            #print (Lines[i][ind+len(attyp)+1:ind+ind_end])
             attype_num = int(Lines[i][ind+len(attyp)+1:ind+ind_end])
     f.close()
     return(attype_num)
@@ -253,8 +253,8 @@ def main():
     args=parser.parse_args()
 
     res1, res2, chains, inits, ends = read_residues(args.pdb_file, args.chain1, args.chain2)
-    print (res1, res2)
-    print (chains, inits, ends)
+    #print (res1, res2)
+    #print (chains, inits, ends)
     #clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
         
     vcon(args.pdb_file)
@@ -267,7 +267,7 @@ def main():
     
     matrix = read_interactions('vcon_file.txt', matrix, args.chain1, args.chain2, args.atomtypes_definition, args.atomtypes_interactions)
     
-    print (matrix)
+    #print (matrix)
     
     matrix.to_csv(args.output_name)
     

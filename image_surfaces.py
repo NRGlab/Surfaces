@@ -1,3 +1,7 @@
+#Imports
+import argparse
+import subprocess
+import sys
 import pymol
 import pandas as pd
 from colour import Color
@@ -35,7 +39,6 @@ def read_residue(res):
     return (type_res, chain_res, num_res)
 
 def color_residue(res, color):
-    pymol.cmd.delete('sele')
     type_res, chain_res, num_res = read_residue(res)
     selection_string = 'chain' + chain_res + ' and chain ' + chain_res + ' and resi ' + num_res
     pymol.cmd.set_color(res, color)
@@ -43,6 +46,7 @@ def color_residue(res, color):
     #pymol.cmd.show('spheres', 'sele')
     pymol.cmd.set("cartoon_transparency", 0.00, 'sele')
     pymol.cmd.color(res, 'sele')
+    pymol.cmd.delete('sele')
     return
 
 def color_scale(values):
