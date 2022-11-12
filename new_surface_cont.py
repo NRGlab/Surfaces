@@ -19,7 +19,7 @@ def read_residues(pdb_file, chain1, chain2):
     f = open(pdb_file, 'r')
     Lines = f.readlines()
     for line in Lines:
-        if line[:4] == 'ATOM':
+        if (line[:4] == 'ATOM' or line[:4] == 'HETA'):
             if line[21] in chain1:
                 res_num = re.findall('\d',line[22:27])
                 res_num = int(''.join(res_num))
@@ -39,7 +39,7 @@ def read_residues(pdb_file, chain1, chain2):
     atoms_end = [-1]*len(chains)
     for line in Lines:
         for i in range(len(chains)):
-            if line[:4] == 'ATOM' and line[21] == chains[i]:
+            if (line[:4] == 'ATOM' or line[:4] == 'HETA') and line[21] == chains[i]:
                 if atoms_init[i] == -1:
                     atoms_init[i] = (int(line[6:12]))
                 if int(line[6:12]) > atoms_end[i]:
@@ -253,6 +253,7 @@ def main():
     args=parser.parse_args()
 
     res1, res2, chains, inits, ends = read_residues(args.pdb_file, args.chain1, args.chain2)
+    print (res1, res2)
     print (chains, inits, ends)
     #clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
         
