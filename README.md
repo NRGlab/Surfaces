@@ -23,6 +23,12 @@ python new_surface_cont.py -f file.pdb -c1 ABC -c2 DE -o output.csv -def atomtyp
 
 For ligand interaction we can use the same function, but adding the LIG atom type definition to the .def file and defining in the pdf file a chain for the ligand, such as X
 
+To update the .def file with ligand atom types
+
+python ligand_atomtypes.py -fl ligand_file.pdb
+
+For the interaction calculation
+
 python new_surface_cont.py -f file.pdb -c1 A -c2 X -o output.csv -def custom_atomtypes_definition.def -dat atomtypes_interactions.dat
 
 For a visual output as a pymol session
