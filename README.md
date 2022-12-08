@@ -31,6 +31,10 @@ For the interaction calculation
 
 python new_surface_cont.py -f file.pdb -c1 A -c2 X -o output.csv -def custom_atomtypes_definition.def -dat atomtypes_interactions.dat
 
+For the interactions of particular residues with all the structure
+
+python residue_surface_cont.py -f pdb_file.pdb -res res1,res2,res3 -o output.csv -def atomtypes_definition.def -dat atomtypes_interactions.dat
+
 For a visual output as a pymol session
 
 python image_surfaces.py -f pdb_file.pdb -c csv_file.csv -o pymol_session_output.pse
