@@ -253,7 +253,7 @@ def main():
     parser.add_argument("-dat","--atomtypes_interactions", action="store")
     args=parser.parse_args()
     
-    get_steric_clashes(args.pdb_file)
+    steric_clashes.get_steric_clashes(args.pdb_file)
 
     res1, res2, chains, inits, ends = read_residues(args.pdb_file, args.chain1, args.chain2)
     #print (res1, res2)
