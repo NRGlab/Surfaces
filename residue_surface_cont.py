@@ -190,7 +190,7 @@ def main():
     parser.add_argument("-dat","--atomtypes_interactions", action="store")
     args=parser.parse_args()
     
-    get_steric_clashes(args.pdb_file)
+    steric_clashes.get_steric_clashes(args.pdb_file)
 
     sele_res = list(args.list_residues.split(","))
     print (sele_res)
