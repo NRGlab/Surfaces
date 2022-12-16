@@ -2,9 +2,6 @@ import pymol
 import pandas as pd
 import argparse
 
-
-# EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
-
 # ANY ATOM NOT IN THIS LIST WILL BE CONSIDERED DUMMY:39
 dict_types={'C.1':'1', 'C.2':'2', 'C.3':'3', 'C.ar':'4', 'C.cat':'5', 'N.1':'6', 
  'N.2':'7', 'N.3':'8', 'N.4':'9', 'N.ar':'10', 'N.am':'11', 'N.pl3':'12',
@@ -62,6 +59,17 @@ def check_atomns (list_atomnames, list_atomtypes):
             if list_atomnames[i] == list_atomnames[j] and list_atomtypes[i] != list_atomtypes[j]:
                 return (False)
     return (True)
+   
+def check_atom_names (pdb_file):
+    f = open(pdb_file, 'r')
+    Lines = f.readlines()
+    for line in Lines:
+        if (line[:4] == 'ATOM' or line[:4] == 'HETA'):
+            atom_name = line[12:17]
+            atom_name = atom_name.strip()
+            if len(atom_name) > 3:
+                return (False)
+    return (True)
 
 def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
     f = open(initial_def_file, 'r')
@@ -81,14 +89,21 @@ def main():
     parser= argparse.ArgumentParser(description="the arguments.", add_help=False)
     parser.add_argument("-fl","--ligand_pdb_file", action="store")
     args=parser.parse_args()
-        
-    convertto_mol2 (args.pdb_file)
-    list_atomnames, list_atomtypes, res = read_mol2 (args.pdb_file[:-4] + '.mol2')
-    if check_atomns (list_atomnames, list_atomtypes):
-        list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
-        custom_def_file ('AMINO_FlexAID.def', list_atomnames, list_atomnumbers, res)
+    
+    # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
+    if not check_atom_names (args.pdb_file):
+        print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
     else:
-        print ("WARNING: ATOMNS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
+    
+        convertto_mol2 (args.pdb_file)
+        list_atomnames, list_atomtypes, res = read_mol2 (args.pdb_file[:-4] + '.mol2')
+    
+    # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
+        if check_atomns (list_atomnames, list_atomtypes):
+            list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
+            custom_def_file ('AMINO_FlexAID.def', list_atomnames, list_atomnumbers, res)
+        else:
+            print ("WARNING: ATOMNS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
         
     return
         
