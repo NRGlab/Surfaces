@@ -16,7 +16,7 @@ python ligand_atomtypes.py -fl ligand_file.pdb
 
 For the interaction calculation
 
-python new_surface_cont.py -f file.pdb -c1 A -c2 X -o output.csv -def custom_atomtypes_definition.def -dat atomtypes_interactions.dat
+python surface_cont.py -f file.pdb -c1 A -c2 X -o output.csv -def custom_atomtypes_definition.def -dat atomtypes_interactions.dat
 
 For the interactions of particular residues with all the structure
 
