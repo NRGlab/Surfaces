@@ -84,7 +84,9 @@ def test_chain(atom, chain1, chain2, inits, ends):
     for i in range(len(chains)):
         if atom >=inits[i] and atom <=ends[i]:
             chain = chains[i]
-    return (chain)
+            return (chain)
+        else:
+            return (False)
 
 def fix_chain(file, chain1, chain2, inits, ends):
     f = open(file, 'r')
@@ -93,8 +95,9 @@ def fix_chain(file, chain1, chain2, inits, ends):
     for line in Lines1:
         if line[:1] != '#' and line[31:34] != 'Sol' and line != '\n':
             chain = test_chain(int(line[20:30]), chain1, chain2, inits, ends)
-            line = line[:45] + chain + line[46:]
-            Lines2.append(line)
+            if chain:
+                line = line[:45] + chain + line[46:]
+                Lines2.append(line)
         else:
             Lines2.append(line)
     f.close()
