@@ -40,7 +40,7 @@ def read_residue(res):
 
 def color_residue(res, color):
     type_res, chain_res, num_res = read_residue(res)
-    selection_string = 'chain' + chain_res + ' and chain ' + chain_res + ' and resi ' + num_res
+    selection_string = 'chain' + chain_res + ' and resi ' + num_res
     pymol.cmd.set_color(res, color)
     pymol.cmd.select(selection_string)
     #pymol.cmd.show('spheres', 'sele')
@@ -61,7 +61,7 @@ def color_scale(values):
     for i in range(5):
         c = Color("red", saturation=1/(5-i))
         Total_colors.append(c.rgb)
-    print (Total_colors)
+    #print (Total_colors)
     
     max_value = max(values)
     min_value = min(values)
@@ -78,6 +78,63 @@ def color_scale(values):
         color_codes.append(list(Total_colors[n]))
         
     return (color_codes)
+
+def color_distance(pair, value, color, selected_pairs):
+    #create distance object
+    distance_string = 'dashed_' + pair[0] + '-' + pair[1]
+    type_res1, chain_res1, num_res1 = read_residue(pair[0])
+    type_res2, chain_res2, num_res2 = read_residue(pair[1])
+    selection_string = 'chain' + chain_res1 + ' and resi ' + num_res1 + ' and n. CA'
+    pymol.cmd.select(selection_string)
+    pymol.cmd.set_name('sele', 'res1')
+    selection_string = 'chain' + chain_res2 + ' and resi ' + num_res2 + ' and n. CA'
+    pymol.cmd.select(selection_string)
+    pymol.cmd.set_name('sele', 'res2')
+    pymol.cmd.set_color(distance_string, color)
+    pymol.cmd.distance(distance_string, 'res1', 'res2')
+    pymol.cmd.color(distance_string, distance_string)
+    pymol.cmd.hide('labels', distance_string)
+    pymol.cmd.delete('res1')
+    pymol.cmd.delete('res2')
+    if pair not in selected_pairs:
+        pymol.cmd.disable(distance_string)
+    return
+    
+def label_pairs(pair,selected_pairs):
+    #create selection
+    pair_string = pair[0] + '-' + pair[1]
+    type_res1, chain_res1, num_res1 = read_residue(pair[0])
+    type_res2, chain_res2, num_res2 = read_residue(pair[1])
+    selection_string1 = 'chain' + chain_res1 + ' & resi ' + num_res1 + ' & n. CA'
+    selection_string2 = 'chain' + chain_res2 + ' & resi ' + num_res2 + ' & n. CA'
+    pymol.cmd.select(selection_string1 + ' ' + selection_string2)
+    pymol.cmd.set_name('sele', pair_string)
+    #label residues
+    pymol.cmd.label(pair_string,"'%s %s %s' %(resn,resi,chain)")
+    if pair not in selected_pairs:
+        pymol.cmd.hide('labels', pair_string)
+    return
+
+def get_top_10(pairs, values):
+    top_pairs = []
+    absolute_values = []
+    size_10_percent = len(values)//10
+    for value in values:
+        absolute_values.append(abs(value))
+    absolute_values.sort(reverse=True)
+    top_values = absolute_values[:size_10_percent]
+    for f in range(len(pairs)):
+        if len(top_pairs) <= len(top_values):
+            if (values[f] in top_values) or (-1*values[f] in top_values):
+                top_pairs.append(pairs[f])
+    return (top_pairs)
+
+def all_pairs_from_interest(pairs, residues_of_interest):
+    selected_pairs = []
+    for pair in pairs:
+        if pair[0] in residues_of_interest or pair[1] in residues_of_interest:
+            selected_pairs.append(pair)
+    return (selected_pairs)
 
 def split_states(residues, pdb_file):
     chains = []
@@ -96,7 +153,7 @@ def show_separate_surfaces(chains):
         pymol.cmd.show('surface', 'chain' + C)
     return
     
-def generate_session(pdb_file, surfaces_file, session_file_name):
+def generate_session(pdb_file, surfaces_file, residues_of_interest, session_file_name):
     residues, values = get_sum_per_residue(surfaces_file)
     color_codes = color_scale(values)
     pymol.cmd.load(pdb_file)
@@ -107,6 +164,16 @@ def generate_session(pdb_file, surfaces_file, session_file_name):
     for i in range(len(residues)):
         if values[i] != 0:
             color_residue(residues[i], color_codes[i])
+    pairs, values = get_pairs_contacts(surfaces_file)
+    if residues_of_interest is None:
+        selected_pairs = get_top_10(pairs, values) # get pairs with largest absolute value of interaction - top 10%
+    else:
+        residues_of_interest = list(residues_of_interest.split(","))
+        selected_pairs = all_pairs_from_interest(pairs, residues_of_interest)
+    color_codes = color_scale(values)
+    for j in range(len(pairs)):
+        color_distance(pairs[j], values[j], color_codes[j], selected_pairs)
+        label_pairs(pairs[j], selected_pairs)
     show_separate_surfaces(chains)
     pymol.cmd.save(session_file_name, format='pse')
     return
@@ -116,7 +183,7 @@ def generate_session(pdb_file, surfaces_file, session_file_name):
 #print (color_scale(values))
 
 ### test function get_pairs_contacts
-#pairs, values = get_pairs_contacts('LIGIN_output_example.csv')
+#pairs, values = get_pairs_contacts('output_7VQ0.csv')
 #print (pairs)
 #print (values)
 
@@ -129,9 +196,10 @@ def main():
     parser.add_argument("-f","--pdb_file", action="store")
     parser.add_argument("-c","--input_csv_file", action="store")
     parser.add_argument("-o","--pymol_session_output_name", action="store")
+    parser.add_argument("-res","--residues_of_interest", action="store")
     args=parser.parse_args()
-
-    generate_session(args.pdb_file, args.input_csv_file, args.pymol_session_output_name)
+    
+    generate_session(args.pdb_file, args.input_csv_file, args.residues_of_interest, args.pymol_session_output_name)
     
     return
 
