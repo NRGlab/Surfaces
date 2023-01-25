@@ -110,9 +110,11 @@ def label_pairs(pair,selected_pairs):
     pymol.cmd.select(selection_string1 + ' ' + selection_string2)
     pymol.cmd.set_name('sele', pair_string)
     #label residues
-    pymol.cmd.label(pair_string,"'%s %s %s' %(resn,resi,chain)")
+    pymol.cmd.label(selection_string1,"'%s %s %s' %(resn,resi,chain)")
+    pymol.cmd.label(selection_string2,"'%s %s %s' %(resn,resi,chain)")
     if pair not in selected_pairs:
-        pymol.cmd.hide('labels', pair_string)
+        pymol.cmd.hide('labels', selection_string1)
+        pymol.cmd.hide('labels', selection_string2)
     return
 
 def get_top_10(pairs, values):
