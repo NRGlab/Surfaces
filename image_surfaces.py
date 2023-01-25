@@ -115,6 +115,9 @@ def label_pairs(pair,selected_pairs):
     if pair not in selected_pairs:
         pymol.cmd.hide('labels', selection_string1)
         pymol.cmd.hide('labels', selection_string2)
+    if pair in selected_pairs:
+        pymol.cmd.show('labels', selection_string1)
+        pymol.cmd.show('labels', selection_string2)
     return
 
 def get_top_10(pairs, values):
