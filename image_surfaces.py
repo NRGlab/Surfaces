@@ -82,6 +82,10 @@ def color_scale(values, color_scale_range):
     for value in values:
         s = range_value/2 - (-1*value)
         n = int(s // step_value)
+        if n < 0:
+            n = 0
+        elif n > len(Total_colors):
+            n = len(Total_colors)
         color_codes.append(list(Total_colors[n]))
         
     return (color_codes)
