@@ -132,14 +132,14 @@ def read_interactions(file, matrix, chains, ligand, def_file, dat_file):
                 atnum,attype,resnum,res,chain = read_atom(line)
                 if res == ligand:
                     atom_name = str(atnum) + attype
-                    print (atom_name)
+                    #print (atom_name)
             else:
             
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(line[22:])
                 main_residue = main_res+str(main_resnum)+main_chain
                 surf = read_surface(line)
                 if (main_chain in chains) and (res == ligand):
-                    print (main_attype, main_res, attype, res)
+                    #print (main_attype, main_res, attype, res)
                     matrix.loc[main_residue, atom_name] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))
   
     return(matrix)
