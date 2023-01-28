@@ -13,10 +13,10 @@ def get_sum_per_residue(surfaces_file):
     surf = pd.read_csv(surfaces_file, index_col=0)
     sum_column = surf.sum()
     sum_row = surf.sum(axis='columns')
-    for x in range(len(sum_column)-2):
+    for x in range(len(sum_column)):
         values.append(sum_column[x])
         residues.append(surf.columns[x])
-    for y in range(len(sum_row)-2):
+    for y in range(len(sum_row)):
         values.append(sum_row[y])
         residues.append(surf.index[y])
     return (residues, values)
