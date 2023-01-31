@@ -213,6 +213,7 @@ def main():
     
     matrix.to_csv(args.output_name)
     
+    os.remove('vcon_file.txt')
     
     #TESTS
     
