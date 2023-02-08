@@ -12,7 +12,7 @@ def get_atoms(line): #take strings after the ' ' and before the ':'
 
 def read_atom(line):
     atnum = int(line[6:11])
-    attype = line[11:17].strip()
+    attype = line[11:16].strip()
     resnum = line[23:30].strip()
     res = line[17:20].strip()
     chain = line[21:22].strip()
@@ -51,18 +51,17 @@ def main():
     #print (res)
     #print (atoms)
     
-    pdb = open(args.pdb_file, "r")
-    clean_pdb = open("clean_" + args.pdb_file, "w")
-    Lines = pdb.readlines()
+    pdb_file = open(args.pdb_file, "r")
+    clean_pdb_file = open("clean_" + args.pdb_file, "w")
+    Lines = pdb_file.readlines()
     for line in Lines:
         if line[:4] == 'ATOM' or line[:4] == 'HETA':
             if check_line(line,res,atoms):
-                clean_pdb.write(line)
+                clean_pdb_file.write(line)
             
-    pdb.close()
-    clean_pdb.close()
+    pdb_file.close()
+    clean_pdb_file.close()
     
     return
-
 
 main()
