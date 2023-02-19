@@ -39,18 +39,16 @@ def read_chains(pdb_file):
     return (residues, chains, atoms)
 
 def read_residues(pdb_file, list_residues):
-    atoms_init = [-1]*len(list_residues)
-    atoms_end = [-1]*len(list_residues)
+    atoms_numbers = []
+    for k in range(len(list_residues)):
+        atoms_numbers.append([])
     f = open(pdb_file, 'r')
     Lines = f.readlines()
     for line in Lines:
         for i in range(len(list_residues)):
             if (line[:4] == 'ATOM' or line[:4] == 'HETA') and (get_residue_name(line)==list_residues[i]):
-                if atoms_init[i] == -1:
-                    atoms_init[i] = (int(line[6:12]))
-                if int(line[6:12]) > atoms_end[i]:
-                    atoms_end[i] = (int(line[6:12]))
-    return (atoms_init, atoms_end)
+                atoms_numbers[i].append(int(line[6:12]))
+    return (atoms_numbers)
 
 
 #Function to generate the file with the output of vcon
@@ -195,7 +193,7 @@ def main():
     sele_res = list(args.list_residues.split(","))
     print (sele_res)
     all_res, chains, atoms = read_chains(args.pdb_file)
-    inits_sele, ends_sele = read_residues(args.pdb_file, sele_res)
+    atoms_numbers = read_residues(args.pdb_file, sele_res)
         
     vcon(args.pdb_file)
     fix_chain('vcon_file.txt',chains, atoms)
