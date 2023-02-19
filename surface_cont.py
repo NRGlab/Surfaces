@@ -34,16 +34,14 @@ def read_residues(pdb_file, chain1, chain2):
                 if string not in list_chain2:
                     list_chain2.append(string)
     chains = chain1 + chain2
-    atoms_init = [-1]*len(chains)
-    atoms_end = [-1]*len(chains)
+    atoms_numbers = []
+    for k in range(len(chains)):
+        atoms_numbers.append([])
     for line in Lines:
         for i in range(len(chains)):
             if (line[:4] == 'ATOM' or line[:4] == 'HETA') and line[21] == chains[i]:
-                if atoms_init[i] == -1:
-                    atoms_init[i] = (int(line[6:12]))
-                if int(line[6:12]) > atoms_end[i]:
-                    atoms_end[i] = (int(line[6:12]))
-    return (list_chain1, list_chain2, chains, atoms_init, atoms_end)
+                atoms_numbers[i].append(int(line[6:12]))
+    return (list_chain1, list_chain2, chains, atoms_numbers)
 
 def clean_pdb(pdb_file, chain1, chain2, new_file):
     f = open(pdb_file, 'r')
@@ -77,22 +75,22 @@ def vcon(pdb_name):
 
 #Functions to fix the names of the chains
 
-def test_chain(atom, chain1, chain2, inits, ends):
+def test_chain(atom, chain1, chain2, atoms_numbers):
     chains = chain1 + chain2
     for i in range(len(chains)):
-        if atom >=inits[i] and atom <=ends[i]:
+        if atom in atoms_numbers[i]:
             chain = chains[i]
             return (chain)
         else:
             return (False)
 
-def fix_chain(file, chain1, chain2, inits, ends):
+def fix_chain(file, chain1, chain2, atoms_numbers):
     f = open(file, 'r')
     Lines1 = f.readlines()
     Lines2 = []
     for line in Lines1:
         if line[:1] != '#' and line[31:34] != 'Sol' and line != '\n':
-            chain = test_chain(int(line[20:30]), chain1, chain2, inits, ends)
+            chain = test_chain(int(line[20:30]), chain1, chain2, atoms_numbers)
             if chain:
                 line = line[:45] + chain + line[46:]
                 Lines2.append(line)
@@ -256,13 +254,13 @@ def main():
     
     steric_clashes.get_steric_clashes(args.pdb_file)
 
-    res1, res2, chains, inits, ends = read_residues(args.pdb_file, args.chain1, args.chain2)
+    res1, res2, chains, atom_numbers = read_residues(args.pdb_file, args.chain1, args.chain2)
     #print (res1, res2)
-    #print (chains, inits, ends)
+    #print (chains, atom_numbers)
     #clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
         
     vcon(args.pdb_file)
-    fix_chain('vcon_file.txt', args.chain1, args.chain2, inits, ends)
+    fix_chain('vcon_file.txt', args.chain1, args.chain2, atom_numbers)
   
     matrix = [ [ 0 for i in range(len(res2)) ] for j in range(len(res1)) ]
     matrix = pd.DataFrame(matrix)
