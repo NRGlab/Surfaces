@@ -80,8 +80,7 @@ def test_chain(atom, chains, inits, ends):
         if atom >=inits[i] and atom <=ends[i]:
             chain = chains[i]
             return (chain)
-        else:
-            return (False)
+    return (False)
 
 def fix_chain(file, chains, inits, ends):
     f = open(file, 'r')
