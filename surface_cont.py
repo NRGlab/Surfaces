@@ -81,8 +81,7 @@ def test_chain(atom, chain1, chain2, atoms_numbers):
         if atom in atoms_numbers[i]:
             chain = chains[i]
             return (chain)
-        else:
-            return (False)
+    return (False)
 
 def fix_chain(file, chain1, chain2, atoms_numbers):
     f = open(file, 'r')
