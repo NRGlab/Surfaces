@@ -25,23 +25,21 @@ def read_residues(pdb_file, chains, ligand):
                 res_num = re.findall('[+-]?\d+',line[22:27])
                 res_name = line[17:20]
                 string = res_name + str(res_num[0]) + line[21]
-                if string not in list_chains:
+                if string not in list_chains and res_name != ligand:
                     list_chains.append(string)
             if line[17:20] == ligand:
-                atom_name = line[12:17].strip()
+                atom_name = line[12:16].strip()
                 atom_number = re.findall('[+-]?\d+',line[6:12])
                 string = str(atom_number[0]) + atom_name
                 list_atoms.append(string)
-    atoms_init = [-1]*len(chains)
-    atoms_end = [-1]*len(chains)
+    atoms_numbers = []
+    for k in range(len(chains)):
+        atoms_numbers.append([])
     for line in Lines:
         for i in range(len(chains)):
             if (line[:4] == 'ATOM' or line[:4] == 'HETA') and line[21] == chains[i]:
-                if atoms_init[i] == -1:
-                    atoms_init[i] = (int(line[6:12]))
-                if int(line[6:12]) > atoms_end[i]:
-                    atoms_end[i] = (int(line[6:12]))
-    return (list_chains, list_atoms, atoms_init, atoms_end)
+                atoms_numbers[i].append(int(line[6:12]))
+    return (list_chains, list_atoms, atoms_numbers)
 
 def clean_pdb(pdb_file, chain1, chain2, new_file):
     f = open(pdb_file, 'r')
@@ -50,7 +48,6 @@ def clean_pdb(pdb_file, chain1, chain2, new_file):
     for line in Lines1:
         if line[:4] == 'ATOM':
             if line[21] == chain1 or line[21] == chain2:
-                #print (line)
                 Lines2.append(line)
     f.close()
     e = open(new_file, 'w')
@@ -75,21 +72,23 @@ def vcon(pdb_name):
 
 #Functions to fix the names of the chains
 
-def test_chain(atom, chains, inits, ends):
+def test_chain(atom, chains, atoms_numbers):
     for i in range(len(chains)):
-        if atom >=inits[i] and atom <=ends[i]:
+        if atom in atoms_numbers[i]:
             chain = chains[i]
             return (chain)
     return (False)
 
-def fix_chain(file, chains, inits, ends):
+def fix_chain(file, chains, atoms_numbers):
     f = open(file, 'r')
     Lines1 = f.readlines()
     Lines2 = []
     for line in Lines1:
         if line[:1] != '#' and line[31:34] != 'Sol' and line != '\n':
-            chain = test_chain(int(line[20:30]), chains, inits, ends)
-            if chain:
+            chain = test_chain(int(line[20:29]), chains, atoms_numbers)
+            if not chain:
+                Lines2.append(line)
+            else:
                 line = line[:45] + chain + line[46:]
                 Lines2.append(line)
         else:
@@ -106,7 +105,7 @@ def fix_chain(file, chains, inits, ends):
 
 def read_atom(line):
     atnum = int(line[:6])
-    attype = line[8:11].strip()
+    attype = line[7:11].strip()
     resnum = int(line[12:17])
     res = line[19:22]
     chain = line[23:24]
@@ -131,15 +130,16 @@ def read_interactions(file, matrix, chains, ligand, def_file, dat_file):
                 atnum,attype,resnum,res,chain = read_atom(line)
                 if res == ligand:
                     atom_name = str(atnum) + attype
-                    #print (atom_name)
+                    #print ("ATOM", atom_name)
             else:
-            
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(line[22:])
-                main_residue = main_res+str(main_resnum)+main_chain
-                surf = read_surface(line)
-                if (main_chain in chains) and (res == ligand):
-                    #print (main_attype, main_res, attype, res)
-                    matrix.loc[main_residue, atom_name] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))
+                if main_res != ligand:
+                    main_residue = main_res+str(main_resnum)+main_chain
+                    surf = read_surface(line)
+                    #print (main_residue)
+                    if (main_chain in chains) and (res == ligand):
+                        #print (main_attype, main_res, attype, res)
+                        matrix.loc[main_residue, atom_name] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))
   
     return(matrix)
 
@@ -248,14 +248,14 @@ def main():
     
     #steric_clashes.get_steric_clashes(args.pdb_file)
 
-    res, atoms, inits, ends = read_residues(args.pdb_file, args.chains, args.ligand)
+    res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, args.ligand)
     
-    #print (res1, res2)
-    #print (chains, inits, ends)
+    #print (res, atoms)
+    #print (args.chains, atom_numbers)
     #clean_pdb(args.pdb_file, args.chain1, args.chain2, 'clean.pdb')
     
     vcon(args.pdb_file)
-    fix_chain('vcon_file.txt', args.chains, inits, ends)
+    fix_chain('vcon_file.txt', args.chains, atom_numbers)
   
     matrix = [ [ 0 for i in range(len(atoms)) ] for j in range(len(res)) ]
     matrix = pd.DataFrame(matrix)
@@ -268,7 +268,10 @@ def main():
     
     matrix.to_csv(args.output_name)
     
-    os.remove('vcon_file.txt')
+    # remove files
+    os.remove("LIG.pdb")
+    os.remove("LIG.mol2")
+    os.remove("vcon_file.txt")
     
     #TESTS
     
