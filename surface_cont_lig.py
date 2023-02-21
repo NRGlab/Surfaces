@@ -173,7 +173,6 @@ def main():
     #clean_pdb(args.pdb_file, args.chains, 'clean.pdb')
     
     vcon(args.pdb_file)
-    #fix_chain('vcon_file.txt', args.chains, atom_numbers)
   
     matrix = [ [ 0 for i in range(len(atoms)) ] for j in range(len(res)) ]
     matrix = pd.DataFrame(matrix)
