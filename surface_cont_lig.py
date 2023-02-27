@@ -40,29 +40,11 @@ def read_residues(pdb_file, chains, ligand):
                 atoms_numbers[i].append(int(line[6:12]))
     return (list_chains, list_atoms, atoms_numbers)
 
-def clean_pdb(pdb_file, chains, new_file):
-    f = open(pdb_file, 'r')
-    Lines1 = f.readlines()
-    Lines2 = []
-    for line in Lines1:
-        if line[:4] == 'ATOM':
-            if line[21] in chains:
-                Lines2.append(line)
-    f.close()
-    e = open(new_file, 'w')
-    for line in Lines2:
-        e.write(line)
-    e.close()
-    return
-
 #Function to generate the file with the output of perl code vcont.pl
 
 def vcon(pdb_name):
     string = "./vcon " + pdb_name + " > vcon_file.txt"
-    #print (string)
     os.system(string)
-    #print ('vcon done')
-
 
 #Functions to fix the names of the chains
 
@@ -124,11 +106,8 @@ def atomtype_num(def_file, res, attyp):
     Lines = f.readlines()
     for i in range(len(Lines)):
         if Lines[i][:3] == res:
-            #print (Lines[i])
             ind = Lines[i].index(attyp+':')
-            #print (Lines[i][ind:])
             ind_end = Lines[i][ind:].index(',')
-            #print (Lines[i][ind+len(attyp)+1:ind+ind_end])
             attype_num = int(Lines[i][ind+len(attyp)+1:ind+ind_end])
     f.close()
     return(attype_num)
@@ -141,7 +120,6 @@ def interactions(dat_file, at1, at2):
         at2 = ' ' + str(at2)
     f = open(dat_file, 'r')
     Lines = f.readlines()
-    #print (str(at1)+'-'+str(at2))
     for line in Lines:
         if str(at1)+'-'+str(at2) == line[5:10] or str(at2)+'-'+str(at1) == line[5:10]:
             interact = float(line[13:])
@@ -170,7 +148,6 @@ def main():
     res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, args.ligand)
     #print (res, atoms)
     #print (args.chains, atom_numbers)
-    #clean_pdb(args.pdb_file, args.chains, 'clean.pdb')
     
     vcon(args.pdb_file)
   
