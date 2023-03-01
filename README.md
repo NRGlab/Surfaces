@@ -24,4 +24,4 @@ python residue_surface_cont.py -f pdb_file.pdb -res res1,res2,res3 -o output.csv
 
 For a visual output as a pymol session, with the optional choice of range for the color scale and residues of insterest to see in larger detail labels and interactions; the largest absolute value of the csv_file will be used as default in case of no -cs input; the 10% most numerically significant insteractions will be used as default in case of no -res input
 
-python image_surfaces.py -f pdb_file.pdb -c csv_file.csv -o pymol_session_output.pse -cs [min_value,max_value] -res [res1,res2,res3]
+python image_surfaces.py -f pdb_file.pdb -c csv_file.csv -o pymol_session_output.pse -cs [min_value,max_value] -res res1,res2,res3
