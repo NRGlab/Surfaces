@@ -1,12 +1,10 @@
 #Imports
 import argparse
-import subprocess
 import sys
 import os
 import re
 import pandas as pd
-import itertools
-import time
+
 
 #Useful dicts
 aa = {'C':'CYS', 'D':'ASP', 'S':'SER', 'Q':'GLN', 'K':'LYS', 'I':'ILE', 'P':'PRO', 'T':'THR', 'F':'PHE', 'N':'ASN', 'G':'GLY', 'H':'HIS', 'L':'LEU', 'R':'ARG', 'W':'TRP', 'A':'ALA', 'V':'VAL', 'E':'GLU', 'Y':'TYR', 'M':'MET'}
