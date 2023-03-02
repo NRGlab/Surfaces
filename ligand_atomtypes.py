@@ -88,6 +88,7 @@ def main():
     
     parser= argparse.ArgumentParser(description="the arguments.", add_help=False)
     parser.add_argument("-fl","--ligand_pdb_file", action="store")
+    parser.add_argument("-def","--atomtypes_definition", action="store")
     args=parser.parse_args()
     
     # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
@@ -101,7 +102,7 @@ def main():
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
         if check_atomns (list_atomnames, list_atomtypes):
             list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
-            custom_def_file ('AMINO_FlexAID.def', list_atomnames, list_atomnumbers, res)
+            custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
         else:
             print ("WARNING: ATOMNS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
         
