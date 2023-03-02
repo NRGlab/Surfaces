@@ -1,6 +1,5 @@
 #Imports
 import argparse
-import subprocess
 import sys
 import pymol
 import pandas as pd
