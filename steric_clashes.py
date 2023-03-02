@@ -90,3 +90,15 @@ def get_steric_clashes(pdb_file):
     give_warning (pairs)
 
     return
+
+def main():
+    
+    parser= argparse.ArgumentParser(description="the arguments.", add_help=False)
+    parser.add_argument("-f","--pdb_file", action="store")
+    args=parser.parse_args()
+    
+    get_steric_clashes(args.pdb_file)
+    
+    return
+
+main()
