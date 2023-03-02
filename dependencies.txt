@@ -1,0 +1,5 @@
+###### Dependencies for Surfaces scripts ######
+argparse
+colour
+pandas
+pymol
