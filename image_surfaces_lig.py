@@ -5,7 +5,6 @@ import sys
 import pymol
 import pandas as pd
 from colour import Color
-import matplotlib.colors
 
 def get_sum_per_residue(surfaces_file):
     residues = []
