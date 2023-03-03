@@ -1,6 +1,5 @@
 #Imports
 import argparse
-import subprocess
 import sys
 import pymol
 import pandas as pd
@@ -190,7 +189,7 @@ def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_
     if residues_of_interest is None:
         selected_pairs = get_top_10(pairs, values) # get pairs with largest absolute value of interaction - top 10%
     else:
-        residues_of_interest = list(residues_of_interest[1:-1].split(","))
+        residues_of_interest = list(residues_of_interest.split(","))
         selected_pairs = all_pairs_from_interest(pairs, residues_of_interest)
     color_codes = color_scale(values)
     for j in range(len(pairs)):
