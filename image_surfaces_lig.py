@@ -150,7 +150,7 @@ def pairs_to_residues(pairs):
 def get_top_10(pairs, values):
     top_pairs = []
     absolute_values = []
-    size_10_percent = len(values)
+    size_10_percent = len(values)//10
     for value in values:
         absolute_values.append(abs(value))
     absolute_values.sort(reverse=True)
@@ -213,9 +213,9 @@ def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_
             color_residue(residues[i], color_codes[i])
     pairs, values = get_pairs_contacts(surfaces_file)
     if residues_of_interest is None:
-        selected_pairs = get_top_10(pairs, values) # get pairs with largest absolute value of interaction - top 10%
+        selected_pairs = pairs
     else:
-        residues_of_interest = list(residues_of_interest[1:-1].split(","))
+        residues_of_interest = list(residues_of_interest.split(","))
         selected_pairs = all_pairs_from_interest(pairs, residues_of_interest)
     color_codes = color_scale(values, color_scale_range)
     for j in range(len(pairs)):
