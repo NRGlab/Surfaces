@@ -106,7 +106,7 @@ def color_distance(pair, value, color, selected_pairs):
     #create distance object
     distance_string = 'dashed_' + pair[0] + '-' + pair[1]
     type_res, chain_res, num_res = read_residue(pair[0])
-    tatom_name, atom_num = read_atom(pair[1])
+    atom_name, atom_num = read_atom(pair[1])
     selection_string = 'chain' + chain_res + ' and resi ' + num_res + ' and n. CA'
     pymol.cmd.select(selection_string)
     pymol.cmd.set_name('sele', 'res')
