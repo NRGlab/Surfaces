@@ -191,7 +191,7 @@ def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_
     else:
         residues_of_interest = list(residues_of_interest.split(","))
         selected_pairs = all_pairs_from_interest(pairs, residues_of_interest)
-    color_codes = color_scale(values)
+    color_codes = color_scale(values, color_scale_range)
     for j in range(len(pairs)):
         color_distance(pairs[j], values[j], color_codes[j], selected_pairs)
         label_pairs(pairs[j], selected_pairs)
