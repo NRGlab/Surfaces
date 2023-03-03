@@ -107,5 +107,9 @@ def main():
             print ("WARNING: ATOMNS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
         
     return
-        
+    
+    # remove files
+    os.remove(args.ligand_pdb_file + ".pdb")
+    os.remove(args.ligand_pdb_file + ".mol2")
+    
 main()
