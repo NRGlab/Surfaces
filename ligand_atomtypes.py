@@ -92,12 +92,12 @@ def main():
     args=parser.parse_args()
     
     # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
-    if not check_atom_names (args.pdb_file):
+    if not check_atom_names (args.ligand_pdb_file):
         print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
     else:
     
-        convertto_mol2 (args.pdb_file)
-        list_atomnames, list_atomtypes, res = read_mol2 (args.pdb_file[:-4] + '.mol2')
+        convertto_mol2 (args.ligand_pdb_file)
+        list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
     
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
         if check_atomns (list_atomnames, list_atomtypes):
