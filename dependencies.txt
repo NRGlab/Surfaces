@@ -2,4 +2,3 @@
 argparse
 colour
 pandas
-pymol
