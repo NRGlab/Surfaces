@@ -159,8 +159,8 @@ def main():
     matrix.to_csv(args.output_name)
     
     # remove files
-    os.remove("LIG.pdb")
-    os.remove("LIG.mol2")
+    os.remove(args.ligand + ".pdb")
+    os.remove(args.ligand + ".mol2")
     os.remove("vcon_file.txt")
     
     return ()
