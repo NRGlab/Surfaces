@@ -176,7 +176,7 @@ def show_separate_surfaces(chains):
     
 def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_range, session_file_name):
     residues, values = get_sum_per_residue(surfaces_file)
-    color_codes = color_scale(values)
+    color_codes = color_scale(values_residues, color_scale_range)
     pymol.cmd.load(pdb_file)
     pymol.cmd.color('grey60', pdb_file[:-4])
     chains = split_states(residues, pdb_file)
