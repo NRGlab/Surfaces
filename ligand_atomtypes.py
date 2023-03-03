@@ -75,7 +75,7 @@ def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
     f = open(initial_def_file, 'r')
     Lines = f.readlines()
     g = open('custom_' + initial_def_file, 'w')
-    new_line = res[:3] + ' | '
+    new_line = '\n' + res[:3] + ' | '
     for i in range(len(list_atomnames)):
         new_line = new_line + list_atomnames[i] + ':' + list_atomnumbers[i] + ', '
     for line in Lines:
