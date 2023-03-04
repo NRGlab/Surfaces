@@ -43,7 +43,7 @@ def read_residues(pdb_file, chain1, chain2):
 #Function to generate the file with the output of perl code vcont.pl
 
 def vcon(pdb_name):
-    string = "./vcon " + pdb_name + " > vcon_file.txt"
+    string = f'{os.path.join(".", "vcon")} {pdb_name} > vcon_file.txt'
     os.system(string)
 
 #Functions to fix the names of the chains
