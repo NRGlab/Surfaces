@@ -55,7 +55,7 @@ def read_residues(pdb_file, list_residues):
 #Function to generate the file with the output of vcon
 
 def vcon(pdb_name):
-    string = "./vcon " + pdb_name + " > vcon_file.txt"
+    string = f'{os.path.join(".", "vcon")} {pdb_name} > vcon_file.txt'
     os.system(string)
 
 #Functions to fix the names of the chains
