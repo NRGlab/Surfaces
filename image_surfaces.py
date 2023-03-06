@@ -47,17 +47,27 @@ def color_residue(res, color):
     pymol.cmd.delete('sele')
     return
 
-def color_scale(values, color_scale_range):
+def generate_color_scale(values, color_scale_range, color_scale):
+    
+    if color_scale is None:
+        top_color = "red"
+        mid_color = "white"
+        bottom_color = "blue"
+    else:
+        color_scale = list(color_scale[1:-1].split(","))
+        top_color = color_scale[2]
+        mid_color = color_scale[1]
+        bottom_color = color_scale[0]
     
     Total_colors = []
     
     for i in range(5):
-        c = Color("blue", saturation=1/(i+1))
+        c = Color(bottom_color, saturation=1/(i+1))
         Total_colors.append(c.rgb)
-    white = Color("white")
+    white = Color(mid_color)
     Total_colors.append(white.rgb)
     for i in range(5):
-        c = Color("red", saturation=1/(5-i))
+        c = Color(top_color, saturation=1/(5-i))
         Total_colors.append(c.rgb)
     #print (Total_colors)
     
@@ -175,9 +185,9 @@ def show_separate_surfaces(chains):
         pymol.cmd.show('surface', 'chain' + C)
     return
     
-def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_range, session_file_name):
+def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale, color_scale_range, session_file_name):
     residues, values = get_sum_per_residue(surfaces_file)
-    color_codes = color_scale(values, color_scale_range)
+    color_codes = generate_color_scale(values, color_scale_range, color_scale)
     pymol.cmd.load(pdb_file)
     pymol.cmd.color('grey60', pdb_file[:-4])
     chains = split_states(residues, pdb_file)
@@ -192,25 +202,14 @@ def generate_session(pdb_file, surfaces_file, residues_of_interest, color_scale_
     else:
         residues_of_interest = list(residues_of_interest.split(","))
         selected_pairs = all_pairs_from_interest(pairs, residues_of_interest)
-    color_codes = color_scale(values, color_scale_range)
+    color_codes = generate_color_scale(values, color_scale_range, color_scale)
     for j in range(len(pairs)):
         color_distance(pairs[j], values[j], color_codes[j], selected_pairs)
         label_pairs(pairs[j], selected_pairs)
     show_separate_surfaces(chains)
     pymol.cmd.save(session_file_name, format='pse')
     return
-
-### test function get_sum_per_residue
-#residues, values = get_sum_per_residue('LIGIN_output_example.csv')
-#print (color_scale(values))
-
-### test function get_pairs_contacts
-#pairs, values = get_pairs_contacts('output_7VQ0.csv')
-#print (pairs)
-#print (values)
-
-### test function read_residue
-#print (read_residue('TYR513B'))
+    
 
 def main():
     
@@ -218,11 +217,12 @@ def main():
     parser.add_argument("-f","--pdb_file", action="store")
     parser.add_argument("-c","--input_csv_file", action="store")
     parser.add_argument("-o","--pymol_session_output_name", action="store")
-    parser.add_argument("-cs","--color_scale_range", action="store")
+    parser.add_argument("-cs","--color_scale", action="store")
+    parser.add_argument("-cs_range","--color_scale_range", action="store")
     parser.add_argument("-res","--residues_of_interest", action="store")
     args=parser.parse_args()
     
-    generate_session(args.pdb_file, args.input_csv_file, args.residues_of_interest, args.color_scale_range, args.pymol_session_output_name)
+    generate_session(args.pdb_file, args.input_csv_file, args.residues_of_interest, args.color_scale, args.color_scale_range, args.pymol_session_output_name)
     
     return
 
