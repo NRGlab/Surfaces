@@ -1,4 +1,5 @@
 ###### Dependencies for Surfaces scripts ######
 argparse
+clang
 colour
 pandas
