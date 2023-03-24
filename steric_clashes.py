@@ -1,17 +1,20 @@
 import argparse
-import pymol
 import re
 
 
 def get_atoms(pdb_file):
-    atom_numbers = []
+    atoms = []
     f = open(pdb_file, 'r')
     Lines = f.readlines()
     for line in Lines:
         if (line[:4] == 'ATOM' or line[:4] == 'HETA'):
             atom_n = (int(line[6:12]))
-            atom_numbers.append(atom_n)
-    return (atom_numbers)
+            coord1 = (float(line[31:38]))
+            coord2 = (float(line[39:46]))
+            coord3 = (float(line[47:54]))
+            #print (coord1, coord2, coord3)
+            atoms.append([atom_n, coord1, coord2, coord3])
+    return (atoms)
 
 def get_residue_name(pdb_line):
     res_num = re.findall('\d',pdb_line[22:27])
@@ -43,12 +46,11 @@ def check_bond(atom1, atom2):
     else:
         return (False)
 
-def check_distance(atom1, atom2):
-    pymol.cmd.select('id ' + str(atom1))
-    pymol.cmd.set_name('sele', 'atom1')
-    pymol.cmd.select('id ' + str(atom2))
-    pymol.cmd.set_name('sele', 'atom2')
-    dist = pymol.cmd.get_distance('atom1','atom2')
+def calculate_distance(atom1, atom2):
+    delta1 = abs(atom1[1] - atom2[1])
+    delta2 = abs(atom1[2] - atom2[2])
+    delta3 = abs(atom1[3] - atom2[3])
+    dist = ((delta1**2) + (delta2**2) + (delta3**2))**(0.5)
     #print (dist)
     if dist > 2:
         return (False)
@@ -71,19 +73,17 @@ def give_warning(pairs):
 def get_steric_clashes(pdb_file):
     
     # get numbers of atoms
-    atom_numbers = get_atoms(pdb_file)
+    atoms = get_atoms(pdb_file)
     # get names and numbers of residues
     residue_names, residue_numbers = get_residues(pdb_file)
-    
-    # load file into pymol
-    pymol.cmd.load(pdb_file)
+
     
     # iterate over every atom
     pairs = []
-    for i in range(len(atom_numbers)):
-        for j in range(len(atom_numbers)):
+    for i in range(len(atoms)):
+        for j in range(len(atoms)):
             if j > i:
-                if (check_distance(atom_numbers[i], atom_numbers[j])) and not (check_adjacence(residue_numbers[i], residue_numbers[j])):
+                if (calculate_distance(atoms[i], atoms[j])) and not (check_adjacence(residue_numbers[i], residue_numbers[j])):
                     pair = [residue_names[i], residue_names[j]]
                     if pair not in pairs:
                         pairs.append(pair)
