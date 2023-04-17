@@ -73,7 +73,7 @@ def read_atom(line):
     return (atnum,attype,resnum,res,chain)
 
 def read_surface(line):
-    surf = (float(line[-6:-1]))
+    surf = (float(line[-12:-6]))
     return (surf)
 
 def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_numbers):
