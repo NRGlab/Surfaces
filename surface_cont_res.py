@@ -88,7 +88,7 @@ def read_surface(line):
     surf = (float(line[-12:-6]))
     return (surf)
 
-def read_interactions(file, matrix, chains, sele_res, all_res, def_file, dat_file, atom_numbers):
+def read_interactions(file, matrix, chains, sele_res, all_res, def_file, dat_file, atom_numbers, scale_factor):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
@@ -106,9 +106,9 @@ def read_interactions(file, matrix, chains, sele_res, all_res, def_file, dat_fil
                     other_residue = res+str(resnum)+fixed_other_chain
                     surf = read_surface(line)
                     if main_residue in sele_res:
-                        matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))/2
+                        matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
                     if other_residue in sele_res:
-                        matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))/2
+                        matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
 
   
     return(matrix)
@@ -168,8 +168,11 @@ def main():
     matrix = pd.DataFrame(matrix)
     matrix.columns = all_res
     matrix.index = sele_res
+    
+    # Determined according to 23 ΔΔG experimental SPR values for Spike mutants
+    scale_factor = 0.000721130265993285
         
-    matrix = read_interactions('vcon_file.txt', matrix, chains, sele_res, all_res, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers)
+    matrix = read_interactions('vcon_file.txt', matrix, chains, sele_res, all_res, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
     
