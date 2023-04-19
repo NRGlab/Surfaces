@@ -76,7 +76,7 @@ def read_surface(line):
     surf = (float(line[-12:-6]))
     return (surf)
 
-def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_numbers):
+def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_numbers, scale_factor):
     chains = chain1 + chain2
     f = open(file, 'r')
     Lines = f.readlines()
@@ -96,9 +96,9 @@ def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_num
                     surf = read_surface(line)
                     if (fixed_other_chain in chain1 and fixed_main_chain in chain2) or (fixed_other_chain in chain2 and fixed_main_chain in chain1):
                         if fixed_main_chain in chain2:
-                            matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))/2
+                            matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
                         if fixed_main_chain in chain1:
-                            matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file))/2
+                            matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
   
     return(matrix)
 
@@ -159,7 +159,10 @@ def main():
     matrix.columns = res2
     matrix.index = res1
     
-    matrix = read_interactions('vcon_file.txt', matrix, args.chain1, args.chain2, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers)
+    # Determined according to 23 ΔΔG experimental SPR values for Spike mutants
+    scale_factor = 0.000721130265993285
+    
+    matrix = read_interactions('vcon_file.txt', matrix, args.chain1, args.chain2, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
     
