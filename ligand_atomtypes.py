@@ -105,11 +105,11 @@ def main():
             custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
         else:
             print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
-        
-    return
-    
+         
     # remove files
     os.remove(args.ligand_pdb_file + ".pdb")
     os.remove(args.ligand_pdb_file + ".mol2")
+ 
+    return
     
 main()
