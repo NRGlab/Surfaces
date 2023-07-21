@@ -115,6 +115,7 @@ def generate_color_scale(values, color_scale_range, color_scale):
 def color_distance(pair, value, color, selected_pairs):
     #create distance object
     distance_string = 'dashed_' + pair[0] + '-' + pair[1]
+    distance_string = distance_string.replace("'", "")
     type_res, chain_res, num_res = read_residue(pair[0])
     atom_name, atom_num = read_atom(pair[1])
     selection_string = 'chain' + chain_res + ' and resi ' + num_res + ' and n. CA'
