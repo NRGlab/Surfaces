@@ -1,3 +1,7 @@
+# Developed by Natália Teruel
+# Najmanovich Research Group
+# Cite this work as Surfaces: A software to quantify and visualize interactions within and between proteins and ligands - Teruel, N. F. B., Borges, V. M., & Najmanovich, R. (2023)
+
 #Imports
 import argparse
 import sys
