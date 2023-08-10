@@ -4,6 +4,9 @@
  * calculates the atom-atom contacts within a protein, along with the
  * solvent accessible surface.
  *
+ * Please cite the following article as a reference:
+ * Quantification of protein surfaces, volumes and atom-atom contacts using a constrained Voronoi procedure
+ * B.J.McConkey, V. Sobolev, and M. Edelman (2002), Bioinformatics, 18:1365-1373.
  * ====================================================================
 
  * NOTES ON METHODOLOGY:
