@@ -135,6 +135,28 @@ def score(attype1, res1, attype2, res2, def_file, dat_file):
     value = interactions(dat_file, at1, at2)
     return (value)
 
+#create file of list of interactions
+def list_file(matrix,output_name):
+    residues1 = []
+    residues2 = []
+    values = []
+    abs_values = []
+    for i in range(len(matrix.index)):
+        for j in range(len(matrix.columns)):
+            num = matrix.loc[matrix.index[i], matrix.columns[j]]
+            if num != 0:
+                residues1.append(matrix.index[i])
+                residues2.append(matrix.columns[j])
+                values.append(num)
+                abs_values.append(abs(num))
+    sorted_residues1 = [x for _,x in sorted(zip(abs_values,residues1),reverse=True)]
+    sorted_residues2 = [x for _,x in sorted(zip(abs_values,residues2),reverse=True)]
+    sorted_values = [x for _,x in sorted(zip(abs_values,values),reverse=True)]
+    f = open("List_" + output_name[:-4] + ".txt", "w")
+    for k in range(len(values)):
+        f.write(sorted_residues1[k] + "," + sorted_residues2[k] + "," + str(sorted_values[k]) + "\n")
+    f.close()
+    return
 
 def main():
     
@@ -164,6 +186,8 @@ def main():
     matrix = read_interactions('vcon_file.txt', matrix, args.chains, args.ligand, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
+
+    list_file(matrix,args.output_name)
     
     # remove files
     os.remove("vcon_file.txt")
