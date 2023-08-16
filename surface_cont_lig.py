@@ -180,8 +180,8 @@ def main():
     matrix.columns = atoms
     matrix.index = res
     
-    # Determined according to 23 ΔΔG experimental SPR values for Spike mutants
-    scale_factor = 0.000721130265993285
+    # Determined according to the AB-Bind dataset results
+    scale_factor = 0.00024329
     
     matrix = read_interactions('vcon_file.txt', matrix, args.chains, args.ligand, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
         
