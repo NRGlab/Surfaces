@@ -107,7 +107,7 @@ def main():
         list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
         custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
     else:
-        print ("WARNING: ATOMNS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
+        print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
         
     return
     
