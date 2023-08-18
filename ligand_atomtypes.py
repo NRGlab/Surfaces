@@ -87,6 +87,15 @@ def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
     g.write(new_line)
     return
 
+def remove_duplicates (list_atomnames, list_atomnumbers):
+    new_list_atomnames = []
+    new_list_atomnumbers = []
+    for k in range(len(list_atomnames)):
+        if list_atomnames[k] not in new_list_atomnames:
+            new_list_atomnames.append(list_atomnames[k])
+            new_list_atomnumbers.append(list_atomnumbers[k])
+    return (new_list_atomnames, new_list_atomnumbers)
+
 
 def main():
     
@@ -105,14 +114,16 @@ def main():
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
     if check_atomns (list_atomnames, list_atomtypes):
         list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
+        list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
         custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
     else:
         print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
-        
+
+    # remove files
+    os.remove(args.ligand_pdb_file[:-4] + ".pdb")
+    os.remove(args.ligand_pdb_file[:-4] + ".mol2")
+ 
     return
     
-    # remove files
-    os.remove(args.ligand_pdb_file + ".pdb")
-    os.remove(args.ligand_pdb_file + ".mol2")
     
 main()
