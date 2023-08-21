@@ -4,7 +4,6 @@
 
 import pandas as pd
 import argparse
-import os
 
 # ANY ATOM NOT IN THIS LIST WILL BE CONSIDERED DUMMY:39
 dict_types={'C.1':'1', 'C.2':'2', 'C.3':'3', 'C.ar':'4', 'C.cat':'5', 'N.1':'6', 
@@ -59,14 +58,14 @@ def atomtypes_to_numbers (list_atomtypes):
             list_atomnumbers.append(dict_types['Du'])
     return (list_atomnumbers)
 
-def check_atomns (list_atomnames, list_atomtypes):
+def check_atoms (list_atomnames, list_atomtypes):
     for i in range(len(list_atomnames)):
         for j in range(len(list_atomnames)):
             if list_atomnames[i] == list_atomnames[j] and list_atomtypes[i] != list_atomtypes[j]:
                 return (False)
     return (True)
    
-def check_atom_names (pdb_file):
+def check_atom_names_pdb (pdb_file):
     f = open(pdb_file, 'r')
     Lines = f.readlines()
     for line in Lines:
@@ -75,6 +74,29 @@ def check_atom_names (pdb_file):
             atom_name = atom_name.strip()
             if len(atom_name) > 3:
                 return (False)
+    return (True)
+    
+def check_atom_names_mol2 (mol2_file):
+    f = open(mol2_file, 'r')
+    Lines = f.readlines()
+    selected_Lines = []
+    select = False
+    for i in range(len(Lines)):
+        if Lines[i] == '@<TRIPOS>BOND\n':
+            select = False
+        if select:
+            selected_Lines.append(Lines[i])
+        if Lines[i] == '@<TRIPOS>ATOM\n':
+            select = True
+    df = pd.DataFrame(columns=['number','name','coord1','coord2','coord3','type','n','res','k'])
+    for line in selected_Lines:
+        add = line[:-2].split("\t")
+        df.loc[len(df)] = add
+    list_atomnames = df['name'].tolist()
+    for atom_name in list_atomnames:
+        atom_name = atom_name.strip()
+        if len(atom_name) > 3:
+            return (False)
     return (True)
 
 def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
@@ -106,20 +128,21 @@ def main():
     parser.add_argument("-mol2","--ligand_mol2_file", action="store")
     parser.add_argument("-def","--atomtypes_definition", action="store")
     args=parser.parse_args()
-    
-    # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
-    if not check_atom_names (args.ligand_pdb_file):
-        print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
 
     if args.ligand_mol2_file == None:
         convertto_mol2 (args.ligand_pdb_file)
         list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
-        os.remove(args.ligand_pdb_file[:-4] + ".mol2")
+        # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
+        if not check_atom_names_pdb (args.ligand_pdb_file):
+            print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
+    
     else:
         list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_mol2_file)
+        if not check_atom_names_mol2 (args.ligand_mol2_file):
+            print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
     
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
-    if not check_atomns (list_atomnames, list_atomtypes):
+    if not check_atoms (list_atomnames, list_atomtypes):
         print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
     list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
     list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
