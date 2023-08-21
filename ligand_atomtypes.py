@@ -2,7 +2,6 @@
 # Najmanovich Research Group
 # Cite this work as Surfaces: A software to quantify and visualize interactions within and between proteins and ligands - Teruel, N. F. B., Borges, V. M., & Najmanovich, R. (2023)
 
-import pymol
 import pandas as pd
 import argparse
 
@@ -110,6 +109,7 @@ def main():
         print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
 
     if args.ligand_mol2_file == None:
+        import pymol
         convertto_mol2 (args.ligand_pdb_file)
         list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
         os.remove(args.ligand_pdb_file[:-4] + ".mol2")
