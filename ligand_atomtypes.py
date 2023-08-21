@@ -100,16 +100,21 @@ def remove_duplicates (list_atomnames, list_atomnumbers):
 def main():
     
     parser= argparse.ArgumentParser(description="the arguments.", add_help=False)
-    parser.add_argument("-fl","--ligand_pdb_file", action="store")
+    parser.add_argument("-pdb","--ligand_pdb_file", action="store")
+    parser.add_argument("-mol2","--ligand_mol2_file", action="store")
     parser.add_argument("-def","--atomtypes_definition", action="store")
     args=parser.parse_args()
     
     # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
     if not check_atom_names (args.ligand_pdb_file):
         print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
-    
-    convertto_mol2 (args.ligand_pdb_file)
-    list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
+
+    if args.ligand_mol2_file == None:
+        convertto_mol2 (args.ligand_pdb_file)
+        list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
+        os.remove(args.ligand_pdb_file[:-4] + ".mol2")
+    else:
+        list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_mol2_file)
     
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
     if check_atomns (list_atomnames, list_atomtypes):
@@ -118,10 +123,6 @@ def main():
         custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
     else:
         print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
-
-    # remove files
-    os.remove(args.ligand_pdb_file[:-4] + ".pdb")
-    os.remove(args.ligand_pdb_file[:-4] + ".mol2")
  
     return
     
