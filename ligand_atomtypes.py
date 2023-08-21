@@ -4,6 +4,7 @@
 
 import pandas as pd
 import argparse
+import os
 
 # ANY ATOM NOT IN THIS LIST WILL BE CONSIDERED DUMMY:39
 dict_types={'C.1':'1', 'C.2':'2', 'C.3':'3', 'C.ar':'4', 'C.cat':'5', 'N.1':'6', 
@@ -13,11 +14,13 @@ dict_types={'C.1':'1', 'C.2':'2', 'C.3':'3', 'C.ar':'4', 'C.cat':'5', 'N.1':'6',
  'Cu':'30', 'Mn':'31', 'Hg':'32', 'Cd':'33', 'Ni':'34', 'Zn':'35', 'Ca':'36', 'Fe':'37', 'Cooh':'38', 'Du':'39'}
 
 def convertto_mol2 (pdb_file):
+    import pymol
     pymol.cmd.load(pdb_file)
     pymol.cmd.save(pdb_file[:-4] + '.mol2')
     return
 
 def convertto_pdb (mol_file):
+    import pymol
     pymol.cmd.load(mol_file)
     pymol.cmd.save(mol_file[:-5] + '.pdb')
     return
@@ -109,7 +112,6 @@ def main():
         print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
 
     if args.ligand_mol2_file == None:
-        import pymol
         convertto_mol2 (args.ligand_pdb_file)
         list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
         os.remove(args.ligand_pdb_file[:-4] + ".mol2")
@@ -117,12 +119,11 @@ def main():
         list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_mol2_file)
     
     # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
-    if check_atomns (list_atomnames, list_atomtypes):
-        list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
-        list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
-        custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
-    else:
+    if not check_atomns (list_atomnames, list_atomtypes):
         print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
+    list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
+    list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
+    custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
  
     return
     
