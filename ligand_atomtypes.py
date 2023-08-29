@@ -99,10 +99,10 @@ def check_atom_names_mol2 (mol2_file):
             return (False)
     return (True)
 
-def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
+def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res, prefix):
     f = open(initial_def_file, 'r')
     Lines = f.readlines()
-    g = open('custom_' + initial_def_file, 'w')
+    g = open(f"{prefix}_{initial_def_file}", 'w')
     new_line = '\n' + res[:3] + ' | '
     for i in range(len(list_atomnames)):
         new_line = new_line + list_atomnames[i] + ':' + list_atomnumbers[i] + ', '
@@ -127,6 +127,7 @@ def main():
     parser.add_argument("-pdb","--ligand_pdb_file", action="store")
     parser.add_argument("-mol2","--ligand_mol2_file", action="store")
     parser.add_argument("-def","--atomtypes_definition", action="store")
+    parser.add_argument("-out","--output_prefix", action="store", default='custom', help = "prefix for the output def file")
     args=parser.parse_args()
 
     if args.ligand_mol2_file == None:
@@ -146,7 +147,7 @@ def main():
         print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
     list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
     list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
-    custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
+    custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res, args.output_prefix)
  
     return
     
