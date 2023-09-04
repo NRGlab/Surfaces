@@ -40,7 +40,7 @@ def read_mol2 (mol_file):
     # breaks between columns: '\t'
     df = pd.DataFrame(columns=['number','name','coord1','coord2','coord3','type','n','res','k'])
     for line in selected_Lines:
-        add = line[:-2].split("\t")
+        add = line[:-2].split()
         df.loc[len(df)] = add
     list_atomnames = df['name'].tolist()
     for k in range(len(list_atomnames)):
@@ -90,7 +90,7 @@ def check_atom_names_mol2 (mol2_file):
             select = True
     df = pd.DataFrame(columns=['number','name','coord1','coord2','coord3','type','n','res','k'])
     for line in selected_Lines:
-        add = line[:-2].split("\t")
+        add = line[:-2].split()
         df.loc[len(df)] = add
     list_atomnames = df['name'].tolist()
     for atom_name in list_atomnames:
