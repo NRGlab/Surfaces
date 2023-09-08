@@ -1,0 +1,4 @@
+pep_version: 2.0.0
+outdir: "test_out"
+indir: "indir"
+sample_table: "indir/surfaces_cath_residue_df_copy.csv"

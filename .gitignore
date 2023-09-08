@@ -1,0 +1,8 @@
+
+.snakemake/*
+.snakemake
+.DS_Store
+*.cif
+indir
+vcon
+Vcontacts-v1-2.o
