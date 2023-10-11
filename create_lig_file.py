@@ -31,7 +31,9 @@ def main():
     parser.add_argument("-lig","--lig_name", action="store")
     args=parser.parse_args()
     
-    create_ligand_file (args.pdb_file, args.lig_name)
+    list_ligs = args.lig_name.split(",")
+    for lig in list_ligs:
+        create_ligand_file (args.pdb_file, lig)
 
     return
     

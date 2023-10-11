@@ -16,12 +16,14 @@ def convertto_mol2 (pdb_file):
     import pymol
     pymol.cmd.load(pdb_file)
     pymol.cmd.save(pdb_file[:-4] + '.mol2')
+    pymol.cmd.delete('all')
     return
 
 def convertto_pdb (mol_file):
     import pymol
     pymol.cmd.load(mol_file)
     pymol.cmd.save(mol_file[:-5] + '.pdb')
+    pymol.cmd.delete('all')
     return
 
 def read_mol2 (mol_file):
@@ -40,7 +42,7 @@ def read_mol2 (mol_file):
     # breaks between columns: '\t'
     df = pd.DataFrame(columns=['number','name','coord1','coord2','coord3','type','n','res','k'])
     for line in selected_Lines:
-        add = line[:-2].split()
+        add = line[:-2].split("\t")
         df.loc[len(df)] = add
     list_atomnames = df['name'].tolist()
     for k in range(len(list_atomnames)):
@@ -90,7 +92,7 @@ def check_atom_names_mol2 (mol2_file):
             select = True
     df = pd.DataFrame(columns=['number','name','coord1','coord2','coord3','type','n','res','k'])
     for line in selected_Lines:
-        add = line[:-2].split()
+        add = line[:-2].split("\t")
         df.loc[len(df)] = add
     list_atomnames = df['name'].tolist()
     for atom_name in list_atomnames:
@@ -99,10 +101,8 @@ def check_atom_names_mol2 (mol2_file):
             return (False)
     return (True)
 
-def custom_def_file (initial_def_file, list_atomnames, list_atomnumbers, res):
-    f = open(initial_def_file, 'r')
+def custom_def_file (f, g, list_atomnames, list_atomnumbers, res):
     Lines = f.readlines()
-    g = open('custom_' + initial_def_file, 'w')
     new_line = '\n' + res[:3] + ' | '
     for i in range(len(list_atomnames)):
         new_line = new_line + list_atomnames[i] + ':' + list_atomnumbers[i] + ', '
@@ -120,6 +120,32 @@ def remove_duplicates (list_atomnames, list_atomnumbers):
             new_list_atomnumbers.append(list_atomnumbers[k])
     return (new_list_atomnames, new_list_atomnumbers)
 
+def add_mol2 (ligand_file, f, g):
+    list_atomnames, list_atomtypes, res = read_mol2 (ligand_file)
+    # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
+    if not check_atom_names_mol2 (ligand_file):
+        print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
+    # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB...
+    if not check_atoms (list_atomnames, list_atomtypes):
+        print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
+    list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
+    list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
+    custom_def_file (f, g, list_atomnames, list_atomnumbers, res)
+    return
+    
+def add_pdb (ligand_file, f, g):
+    convertto_mol2 (ligand_file)
+    list_atomnames, list_atomtypes, res = read_mol2 (ligand_file[:-4] + '.mol2')
+    # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
+    if not check_atom_names_pdb (ligand_file):
+        print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
+    # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB...
+    if not check_atoms (list_atomnames, list_atomtypes):
+        print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
+    list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
+    list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
+    custom_def_file (f, g, list_atomnames, list_atomnumbers, res)
+    return
 
 def main():
     
@@ -127,27 +153,28 @@ def main():
     parser.add_argument("-pdb","--ligand_pdb_file", action="store")
     parser.add_argument("-mol2","--ligand_mol2_file", action="store")
     parser.add_argument("-def","--atomtypes_definition", action="store")
+    parser.add_argument("-prefix","--prefix_new_atomtypes_definition", action="store")
     args=parser.parse_args()
-
+    
+    f = open(args.atomtypes_definition, 'r')
+    if args.prefix_new_atomtypes_definition == None:
+        g = open('custom_' + args.atomtypes_definition, 'w')
+    else:
+        g = open(args.prefix_new_atomtypes_definition + '_' + args.atomtypes_definition, 'w')
+    
     if args.ligand_mol2_file == None:
-        convertto_mol2 (args.ligand_pdb_file)
-        list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_pdb_file[:-4] + '.mol2')
-        # EVERY ATOM NAME SHOULD HAVE UP TO 3 CHARACTERS IN ORDER TO AVOID MOL2 CONVERSION ISSUES
-        if not check_atom_names_pdb (args.ligand_pdb_file):
-            print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
+        list_ligand_files = args.ligand_pdb_file.split(",")
+        for ligand_file in list_ligand_files:
+            add_pdb (ligand_file, f, g)
     
     else:
-        list_atomnames, list_atomtypes, res = read_mol2 (args.ligand_mol2_file)
-        if not check_atom_names_mol2 (args.ligand_mol2_file):
-            print ("WARNING: ATOM NAMES LARGER THAN 3 CHARACTERS - POSSIBLE PROBLEM WITH ATOM TYPE READING")
-    
-    # EVERY ATOM FROM THE LIGAND NEEDS TO HAVE A DIFFERENT NAME; EG. CA,CB... 
-    if not check_atoms (list_atomnames, list_atomtypes):
-        print ("WARNING: ATOMS WITH DIFFERENT ATOM TYPES AND SAME ATOM NAME")
-    list_atomnumbers = atomtypes_to_numbers (list_atomtypes)
-    list_atomnames, list_atomnumbers = remove_duplicates (list_atomnames, list_atomnumbers)
-    custom_def_file (args.atomtypes_definition, list_atomnames, list_atomnumbers, res)
+        list_ligand_files = args.ligand_mol2_file.split(",")
+        for ligand_file in list_ligand_files:
+            add_mol2 (ligand_file, f, g)
+            
  
+    g.close()
+    
     return
     
     

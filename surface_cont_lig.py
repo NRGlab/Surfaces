@@ -15,7 +15,7 @@ aa = {'C':'CYS', 'D':'ASP', 'S':'SER', 'Q':'GLN', 'K':'LYS', 'I':'ILE', 'P':'PRO
 
 #Input of pdb file and the 2 chains between which we want to evaluate the interactions
 
-def read_residues(pdb_file, chains, ligand):
+def read_residues(pdb_file, chains, ligands):
     list_chains = []
     list_atoms = []
     f = open(pdb_file, 'r')
@@ -26,9 +26,9 @@ def read_residues(pdb_file, chains, ligand):
                 res_num = re.findall('[+-]?\d+',line[22:27])
                 res_name = line[17:20]
                 string = res_name + str(res_num[0]) + line[21]
-                if string not in list_chains and res_name != ligand:
+                if string not in list_chains and res_name not in ligands:
                     list_chains.append(string)
-            if line[17:20] == ligand:
+            if line[17:20] in ligands:
                 atom_name = line[12:16].strip()
                 atom_number = re.findall('[+-]?\d+',line[6:12])
                 string = str(atom_number[0]) + atom_name
@@ -78,7 +78,7 @@ def read_surface(line):
     surf = (float(line[-12:-6]))
     return (surf)
 
-def read_interactions(file, matrix, chains, ligand, def_file, dat_file, atom_numbers, scale_factor):
+def read_interactions(file, matrix, chains, ligands, def_file, dat_file, atom_numbers, scale_factor):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
@@ -86,16 +86,16 @@ def read_interactions(file, matrix, chains, ligand, def_file, dat_file, atom_num
             if line[31:34] == 'Sol':
                 atnum,attype,resnum,res,chain = read_atom(line)
                 fixed_chain = get_chain(atnum,chain,chains,atom_numbers)
-                if res == ligand:
+                if res in ligands:
                     atom_name = str(atnum) + attype
             else:
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(line[22:])
                 fixed_main_chain = get_chain(main_atnum,main_chain,chains,atom_numbers)
                 if fixed_main_chain != 0:
-                    if main_res != ligand:
+                    if main_res not in ligands:
                         main_residue = main_res+str(main_resnum)+fixed_main_chain
                         surf = read_surface(line)
-                        if (fixed_main_chain in chains) and (res == ligand):
+                        if (fixed_main_chain in chains) and (res in ligands):
                             matrix.loc[main_residue, atom_name] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)
   
     return(matrix)
@@ -169,7 +169,8 @@ def main():
     parser.add_argument("-dat","--atomtypes_interactions", action="store")
     args=parser.parse_args()
     
-    res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, args.ligand)
+    list_ligands = args.ligand.split(",")
+    res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, list_ligands)
     #print (res, atoms)
     #print (args.chains, atom_numbers)
     
@@ -183,7 +184,7 @@ def main():
     # Determined according to the AB-Bind dataset results
     scale_factor = 0.00024329
     
-    matrix = read_interactions('vcon_file.txt', matrix, args.chains, args.ligand, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
+    matrix = read_interactions('vcon_file.txt', matrix, args.chains, list_ligands, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
 
