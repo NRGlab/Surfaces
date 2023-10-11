@@ -9,9 +9,10 @@ def get_atoms(line): #take strings after the ' ' and before the ':'
     list_atoms = []
     L = line[5:-2].split(",")
     for item in L:
-        item = item.strip()
-        id = item.index(":")
-        list_atoms.append(item[:id])
+        if len(item) > 0:
+            item = item.strip()
+            id = item.index(":")
+            list_atoms.append(item[:id])
     return (list_atoms)
 
 def read_atom(line):
