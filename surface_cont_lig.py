@@ -32,7 +32,8 @@ def read_residues(pdb_file, chains, ligands):
                 atom_name = line[12:16].strip()
                 atom_number = re.findall('[+-]?\d+',line[6:12])
                 string = str(atom_number[0]) + atom_name
-                list_atoms.append(string)
+                if string not in list_atoms:
+                    list_atoms.append(string)
     atoms_numbers = []
     for k in range(len(chains)):
         atoms_numbers.append([])
