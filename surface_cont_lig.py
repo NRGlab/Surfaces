@@ -32,8 +32,7 @@ def read_residues(pdb_file, chains, ligands):
                 atom_name = line[12:16].strip()
                 atom_number = re.findall('[+-]?\d+',line[6:12])
                 string = str(atom_number[0]) + atom_name
-                if string not in list_atoms:
-                    list_atoms.append(string)
+                list_atoms.append(string)
     atoms_numbers = []
     for k in range(len(chains)):
         atoms_numbers.append([])
@@ -50,6 +49,16 @@ def vcon(pdb_name):
     os.system(string)
 
 #Functions to fix the names of the chains
+
+def total_chains(pdb_file):
+    all_chains = []
+    f = open(pdb_file, 'r')
+    Lines = f.readlines()
+    for line in Lines:
+        if (line[:4] == 'ATOM' or line[:4] == 'HETA'):
+            if line[21] not in all_chains:
+                all_chains.append(line[21])
+    return (all_chains)
 
 def get_chain(atom, og_chain, chains, atom_numbers):
     if og_chain in chains:
@@ -79,19 +88,19 @@ def read_surface(line):
     surf = (float(line[-12:-6]))
     return (surf)
 
-def read_interactions(file, matrix, chains, ligands, def_file, dat_file, atom_numbers, scale_factor):
+def read_interactions(file, matrix, chains, ligands, def_file, dat_file, all_chains, atom_numbers, scale_factor):
     f = open(file, 'r')
     Lines = f.readlines()
     for line in Lines:
         if line[:1] != '#' and line != '\n':
             if line[31:34] == 'Sol':
                 atnum,attype,resnum,res,chain = read_atom(line)
-                fixed_chain = get_chain(atnum,chain,chains,atom_numbers)
+                fixed_chain = get_chain(atnum,chain,all_chains,atom_numbers)
                 if res in ligands:
                     atom_name = str(atnum) + attype
             else:
                 main_atnum,main_attype,main_resnum,main_res,main_chain = read_atom(line[22:])
-                fixed_main_chain = get_chain(main_atnum,main_chain,chains,atom_numbers)
+                fixed_main_chain = get_chain(main_atnum,main_chain,all_chains,atom_numbers)
                 if fixed_main_chain != 0:
                     if main_res not in ligands:
                         main_residue = main_res+str(main_resnum)+fixed_main_chain
@@ -171,7 +180,8 @@ def main():
     args=parser.parse_args()
     
     list_ligands = args.ligand.split(",")
-    res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, list_ligands)
+    all_chains = total_chains(args.pdb_file)
+    res, atoms, atom_numbers = read_residues(args.pdb_file, all_chains, list_ligands)
     #print (res, atoms)
     #print (args.chains, atom_numbers)
     
@@ -185,7 +195,7 @@ def main():
     # Determined according to the AB-Bind dataset results
     scale_factor = 0.00024329
     
-    matrix = read_interactions('vcon_file.txt', matrix, args.chains, list_ligands, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
+    matrix = read_interactions('vcon_file.txt', matrix, args.chains, list_ligands, args.atomtypes_definition, args.atomtypes_interactions, all_chains, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
 
