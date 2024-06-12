@@ -181,7 +181,7 @@ def main():
     
     list_ligands = args.ligand.split(",")
     all_chains = total_chains(args.pdb_file)
-    res, atoms, atom_numbers = read_residues(args.pdb_file, all_chains, list_ligands)
+    res, atoms, atom_numbers = read_residues(args.pdb_file, args.chains, list_ligands)
     #print (res, atoms)
     #print (args.chains, atom_numbers)
     
@@ -194,7 +194,7 @@ def main():
     
     # Determined according to the AB-Bind dataset results
     scale_factor = 0.00024329
-    
+    res, atoms, atom_numbers = read_residues(args.pdb_file, all_chains, list_ligands)
     matrix = read_interactions('vcon_file.txt', matrix, args.chains, list_ligands, args.atomtypes_definition, args.atomtypes_interactions, all_chains, atom_numbers, scale_factor)
         
     matrix.to_csv(args.output_name)
