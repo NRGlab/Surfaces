@@ -190,7 +190,7 @@ def main():
         
     vcon(args.pdb_file)
   
-    matrix = [ [ 0 for i in range(len(all_res)) ] for j in range(len(sele_res)) ]
+    matrix = [ [ 0.0 for i in range(len(all_res)) ] for j in range(len(sele_res)) ]
     matrix = pd.DataFrame(matrix)
     matrix.columns = all_res
     matrix.index = sele_res
