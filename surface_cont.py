@@ -180,7 +180,7 @@ def main():
         
     vcon(args.pdb_file)
   
-    matrix = [ [ 0 for i in range(len(res2)) ] for j in range(len(res1)) ]
+    matrix = [ [ 0.0 for i in range(len(res2)) ] for j in range(len(res1)) ]
     matrix = pd.DataFrame(matrix)
     matrix.columns = res2
     matrix.index = res1
