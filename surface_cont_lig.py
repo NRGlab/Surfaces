@@ -187,7 +187,7 @@ def main():
     
     vcon(args.pdb_file)
   
-    matrix = [ [ 0 for i in range(len(atoms)) ] for j in range(len(res)) ]
+    matrix = [ [ 0.0 for i in range(len(atoms)) ] for j in range(len(res)) ]
     matrix = pd.DataFrame(matrix)
     matrix.columns = atoms
     matrix.index = res
