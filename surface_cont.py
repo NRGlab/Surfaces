@@ -23,13 +23,13 @@ def read_residues(pdb_file, chain1, chain2):
     for line in Lines:
         if (line[:4] == 'ATOM' or line[:4] == 'HETA'):
             if line[21] in chain1:
-                res_num = re.findall('[+-]?\d+',line[22:27])
+                res_num = re.findall(r'[+-]?\d+',line[22:27])
                 res_name = line[17:20]
                 string = res_name + str(res_num[0]) + line[21]
                 if string not in list_chain1:
                     list_chain1.append(string)
             if line[21] in chain2:
-                res_num = re.findall('[+-]?\d+',line[22:27])
+                res_num = re.findall(r'[+-]?\d+',line[22:27])
                 res_name = line[17:20]
                 string = res_name + str(res_num[0]) + line[21]
                 if string not in list_chain2:
