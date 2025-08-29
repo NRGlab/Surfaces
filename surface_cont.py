@@ -77,8 +77,16 @@ def read_atom(line):
     return (atnum,attype,resnum,res,chain)
 
 def read_surface(line):
-    surf = (float(line[-12:-6]))
-    return (surf)
+    # Extract all floats on the line (handles 0, 0., 1.23, 1e-3, etc.)
+    floats = re.findall(r'[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?', line)
+    if 'Sol_acc_surf' in line:
+        # Atom header line: only one numeric value at the end (the solvent-accessible area)
+        return float(floats[-1])
+    else:
+        # Contact line: last two numbers are AREA and DIST → take penultimate as AREA
+        if len(floats) < 2:
+            raise ValueError(f"Could not find AREA/DIST on line: {line!r}")
+        return float(floats[-2])
 
 def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_numbers, scale_factor):
     chains = chain1 + chain2
