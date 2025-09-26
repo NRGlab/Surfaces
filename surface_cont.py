@@ -8,6 +8,7 @@ import sys
 import os
 import re
 import pandas as pd
+from vconpy import run_vcon
 
 
 #Useful dicts
@@ -47,10 +48,8 @@ def read_residues(pdb_file, chain1, chain2):
 #Function to generate the file with the output of perl code vcont.pl
 
 def vcon(pdb_name):
-    string = f'{os.path.join(".", "vcon")} {pdb_name} > vcon_file.txt'
-    os.system(string)
-
-#Functions to fix the names of the chains
+    #run_vcon(pdb_name, showbonded=True)
+    os.system(f"./vcon {pdb_name} > {pdb_name[:-4]}.vcon")
 
 def get_chain(atom, og_chain, chains, atom_numbers):
     if og_chain in chains:
@@ -111,7 +110,6 @@ def read_interactions(file, matrix, chain1, chain2, def_file, dat_file, atom_num
                             matrix.loc[other_residue, main_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
                         if fixed_main_chain in chain1:
                             matrix.loc[main_residue, other_residue] += (surf * score(main_attype, main_res, attype, res, def_file, dat_file) * scale_factor)/2
-  
     return(matrix)
 
 #get the atom type number from def file of choice
@@ -165,7 +163,7 @@ def list_file(matrix,output_name):
     sorted_residues1 = [x for _,x in sorted(zip(abs_values,residues1),reverse=True)]
     sorted_residues2 = [x for _,x in sorted(zip(abs_values,residues2),reverse=True)]
     sorted_values = [x for _,x in sorted(zip(abs_values,values),reverse=True)]
-    f = open("List_" + output_name[:-4] + ".txt", "w")
+    f = open(output_name[:-4] + "_list.txt", "w")
     for k in range(len(values)):
         f.write(sorted_residues1[k] + "," + sorted_residues2[k] + "," + str(sorted_values[k]) + "\n")
     f.close()
@@ -196,13 +194,13 @@ def main():
     # Determined according to the AB-Bind dataset results
     scale_factor = 0.00024329
     
-    matrix = read_interactions('vcon_file.txt', matrix, args.chain1, args.chain2, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
-        
+    matrix = read_interactions(args.pdb_file[:-4]+".vcon", matrix, args.chain1, args.chain2, args.atomtypes_definition, args.atomtypes_interactions, atom_numbers, scale_factor)
+
     matrix.to_csv(args.output_name)
 
     list_file(matrix,args.output_name)
     
-    os.remove('vcon_file.txt')
+    os.remove(args.pdb_file[:-4]+".vcon")
     
     return
     

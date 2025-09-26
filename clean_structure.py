@@ -57,7 +57,7 @@ def main():
     #print (atoms)
     
     pdb_file = open(args.pdb_file, "r")
-    clean_pdb_file = open("clean_" + args.pdb_file, "w")
+    clean_pdb_file = open(args.pdb_file[:-4]+"_clean.pdb" , "w")
     Lines = pdb_file.readlines()
     for line in Lines:
         if line[:4] == 'ATOM' or line[:4] == 'HETA':
